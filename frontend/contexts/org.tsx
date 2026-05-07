@@ -26,11 +26,12 @@ const ORG_STORAGE_KEY = "active_org_id";
 const OrgContext = createContext<OrgState | null>(null);
 
 export function OrgProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [orgs, setOrgs] = useState<OrgWithRoleResponse[]>([]);
   const [activeOrg, setActiveOrgState] = useState<OrgWithRoleResponse | null>(
     null,
   );
+
   const [loading, setLoading] = useState(true);
 
   const fetchOrgs = useCallback(async () => {
@@ -43,8 +44,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     try {
       const data = await orgsApi.list();
       setOrgs(data);
-
-      // Restore previously selected org, or default to the first one
       const storedId = localStorage.getItem(ORG_STORAGE_KEY);
       const restored = data.find((o) => o.id === storedId) ?? data[0] ?? null;
       setActiveOrgState(restored);
@@ -57,9 +56,16 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchOrgs();
-  }, [fetchOrgs]);
+    if (authLoading) return;
+    let cancelled = false;
+    const run = async () => {
+      if (!cancelled) await fetchOrgs();
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchOrgs, authLoading]);
 
   const setActiveOrg = useCallback((org: OrgWithRoleResponse) => {
     setActiveOrgState(org);
