@@ -61,6 +61,7 @@ class Settings(BaseSettings):
     # ── Stripe ────────────────────────────────────────────────────────────────
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
+    stripe_pro_price_id: str = ""
 
     @property
     def stripe_enabled(self) -> bool:
