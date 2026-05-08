@@ -19,6 +19,7 @@ import {
   Users,
   LayoutDashboard,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 import { useOrg } from "@/contexts/org";
 import { useAuth } from "@/contexts/auth";
@@ -74,6 +75,7 @@ function OrgSwitcher() {
 const navItems = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/members", label: "Members", icon: Users },
+  { href: "/billing", label: "Billing", icon: CreditCard },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -95,16 +97,12 @@ export default function DashboardLayout({
 
   // Redirect to org creation if user has no orgs
   useEffect(() => {
-    if (
-      !authLoading &&
-      !orgLoading &&
-      user &&
-      !activeOrg &&
-      pathname !== "/orgs/new"
-    ) {
+    if (authLoading || orgLoading) return;
+    if (!user) return;
+    if (!activeOrg && pathname !== "/orgs/new") {
       router.replace("/orgs/new");
     }
-  }, [user, authLoading, activeOrg, orgLoading, router, pathname]);
+  }, [authLoading, orgLoading, user, activeOrg, router, pathname]);
 
   if (authLoading || orgLoading || !user) return null;
 
