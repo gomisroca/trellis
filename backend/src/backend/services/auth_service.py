@@ -86,6 +86,12 @@ async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
     )
     return result.scalar_one_or_none()
 
+async def update_user(
+    db: AsyncSession, user: User, full_name: str | None
+) -> User:
+    user.full_name = full_name
+    await db.flush()
+    return user
 
 # ── Auth operations ───────────────────────────────────────────────────────────
 async def register_user(db: AsyncSession, data: UserRegister) -> User:

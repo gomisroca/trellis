@@ -1,6 +1,7 @@
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 
 from backend.db.session import get_db
 from backend.schemas.user import (
@@ -19,12 +20,15 @@ from backend.services.auth_service import (
     decode_token,
     get_user_by_id,
     register_user,
+    update_user,
 )
 from backend.deps import get_current_user
 from backend.models.user import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+class UpdateProfileRequest(BaseModel):
+    full_name: str | None = None
 
 # ── Register ──────────────────────────────────────────────────────────────────
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -89,6 +93,15 @@ async def refresh(data: RefreshTokenRequest, db: AsyncSession = Depends(get_db))
 @router.get("/me", response_model=UserResponse)
 async def me(current_user: User = Depends(get_current_user)):
     return UserResponse.model_validate(current_user)
+
+@router.patch("/me", response_model=UserResponse)
+async def update_me(
+    data: UpdateProfileRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await update_user(db, current_user, data.full_name)
+    return UserResponse.model_validate(user)
 
 
 # ── Forgot password ───────────────────────────────────────────────────────────
