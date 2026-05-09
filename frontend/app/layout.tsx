@@ -7,7 +7,7 @@ import { OrgProvider } from "@/contexts/org";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SaaS",
+  title: "Trellis",
   description: "Multi-tenant SaaS",
 };
 
