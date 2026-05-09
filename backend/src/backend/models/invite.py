@@ -59,8 +59,12 @@ class Invite(Base):
 
     @property
     def is_expired(self) -> bool:
-        from datetime import UTC
-        return datetime.now(UTC) > self.expires_at
+        from datetime import UTC, datetime, timezone
+        now = datetime.now(UTC)
+        expires = self.expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        return now > expires
 
     @property
     def is_accepted(self) -> bool:
