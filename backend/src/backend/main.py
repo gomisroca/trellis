@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api.v1 import auth, orgs, invites, billing
+from backend.api.v1 import auth, orgs, invites, billing, oauth
 from backend.config import get_settings
 from backend.db.session import engine, Base
 
@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
 
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="SaaS", # TODO: Change to actual project name when we have one
+    title="Trellis",
     version="0.1.0",
     docs_url=None if settings.is_production else "/docs",
     redoc_url=None if settings.is_production else "/redoc",
@@ -44,6 +44,7 @@ app.include_router(auth.router, prefix="/api/v1")
 app.include_router(orgs.router, prefix="/api/v1")
 app.include_router(invites.router, prefix="/api/v1")
 app.include_router(billing.router, prefix="/api/v1")
+app.include_router(oauth.router, prefix="/api/v1")
 
 
 # ── Health check ─────────────────────────────────────────────────────────────
