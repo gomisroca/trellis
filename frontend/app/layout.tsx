@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Toaster } from "sileo";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/auth";
 import { OrgProvider } from "@/contexts/org";
@@ -20,7 +21,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={geist.className}>
         <AuthProvider>
-          <OrgProvider>{children}</OrgProvider>
+          <OrgProvider>
+            {children}
+            <Toaster position="bottom-right" />
+          </OrgProvider>
         </AuthProvider>
       </body>
     </html>
