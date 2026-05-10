@@ -42,6 +42,7 @@ import { InviteResponse } from "@/types/Invites";
 import { useOrg } from "@/contexts/org";
 import { sileo } from "sileo";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar } from "@/components/avatar";
 
 // ── Empty states ─────────────────────────────────────────────────────────────────
 function EmptyMembers({ orgName }: { orgName: string }) {
@@ -327,7 +328,16 @@ export default function MembersPage() {
                 members.map((member) => (
                   <TableRow key={member.user_id}>
                     <TableCell className="font-medium">
-                      {member.full_name ?? "—"}
+                      <div className="flex items-center gap-2">
+                        <Avatar
+                          name={member.full_name}
+                          avatarUrl={member.avatar_url}
+                          size="sm"
+                        />
+                        <span className="font-medium">
+                          {member.full_name ?? "—"}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {member.email}

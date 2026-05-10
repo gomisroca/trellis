@@ -24,6 +24,8 @@ import {
 import { useOrg } from "@/contexts/org";
 import { useAuth } from "@/contexts/auth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Avatar } from "@/components/avatar";
 
 function SidebarSkeleton() {
   return (
@@ -169,18 +171,28 @@ export default function DashboardLayout({
 
         {/* User + logout */}
         <div className="border-t pt-3 mt-3 px-1">
-          <div className="text-xs text-muted-foreground truncate px-2 mb-2">
-            {user.email}
+          <div className="flex items-center gap-2 px-2 mb-2">
+            <Avatar
+              name={user.full_name}
+              avatarUrl={user.avatar_url ?? null}
+              size="sm"
+            />
+            <span className="text-xs text-muted-foreground truncate">
+              {user.email}
+            </span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start text-muted-foreground"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
-          </Button>
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1 justify-start text-muted-foreground"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </Button>
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
 

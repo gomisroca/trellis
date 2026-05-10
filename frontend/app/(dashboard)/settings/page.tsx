@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { sileo } from "sileo";
+import { Avatar } from "@/components/avatar";
 
 // ── Profile settings ──────────────────────────────────────────────────────────
 function ProfileSettings() {
@@ -51,27 +52,42 @@ function ProfileSettings() {
           <CardTitle>Profile</CardTitle>
           <CardDescription>Update your personal details.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="full-name">Full name</Label>
-            <Input
-              id="full-name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Jane Smith"
+        <CardContent className="space-y-6">
+          <div className="flex items-center gap-4 pb-4 border-b">
+            <Avatar
+              name={user?.full_name ?? null}
+              avatarUrl={user?.avatar_url ?? null}
+              size="lg"
             />
+            <div>
+              <p className="text-sm font-medium">
+                {user?.full_name ?? "No name set"}
+              </p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              value={user?.email ?? ""}
-              disabled
-              className="text-muted-foreground"
-            />
-            <p className="text-xs text-muted-foreground">
-              Email cannot be changed.
-            </p>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="full-name">Full name</Label>
+              <Input
+                id="full-name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Jane Smith"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                value={user?.email ?? ""}
+                disabled
+                className="text-muted-foreground"
+              />
+              <p className="text-xs text-muted-foreground">
+                Email cannot be changed.
+              </p>
+            </div>
           </div>
         </CardContent>
         <CardFooter>
