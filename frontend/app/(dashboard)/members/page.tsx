@@ -35,7 +35,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { UserPlus, Trash2 } from "lucide-react";
+import { UserPlus, Trash2, Users, Mail } from "lucide-react";
 import { invitesApi, orgsApi } from "@/lib/api";
 import { MemberResponse } from "@/types/Orgs";
 import { InviteResponse } from "@/types/Invites";
@@ -43,6 +43,33 @@ import { useOrg } from "@/contexts/org";
 import { sileo } from "sileo";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// ── Empty states ─────────────────────────────────────────────────────────────────
+function EmptyMembers({ orgName }: { orgName: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="rounded-full bg-muted p-4 mb-4">
+        <Users className="h-8 w-8 text-muted-foreground" />
+      </div>
+      <h3 className="font-semibold text-lg mb-1">No members yet</h3>
+      <p className="text-muted-foreground text-sm max-w-xs">
+        Invite your team to collaborate in {orgName}.
+      </p>
+    </div>
+  );
+}
+
+function EmptyInvites() {
+  return (
+    <div className="flex flex-col items-center justify-center py-10 text-center">
+      <div className="rounded-full bg-muted p-3 mb-3">
+        <Mail className="h-6 w-6 text-muted-foreground" />
+      </div>
+      <p className="text-muted-foreground text-sm">No pending invites.</p>
+    </div>
+  );
+}
+
+// ── Skeleton ─────────────────────────────────────────────────────────────────
 function MembersSkeleton() {
   return (
     <div className="space-y-8">
@@ -288,60 +315,70 @@ export default function MembersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {members.map((member) => (
-                <TableRow key={member.user_id}>
-                  <TableCell className="font-medium">
-                    {member.full_name ?? "—"}
+              {members.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={isAdmin ? 5 : 4}>
+                    <EmptyMembers
+                      orgName={activeOrg?.name ?? "this organisation"}
+                    />
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {member.email}
-                  </TableCell>
-                  <TableCell>
-                    {isAdmin && member.role !== "owner" ? (
-                      <Select
-                        value={member.role}
-                        onValueChange={(v) =>
-                          handleRoleChange(member.user_id, v)
-                        }
-                      >
-                        <SelectTrigger className="w-28 h-7 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="member">Member</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <RoleBadge role={member.role} />
-                    )}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {new Date(member.joined_at).toLocaleDateString()}
-                  </TableCell>
-                  {isAdmin && (
+                </TableRow>
+              ) : (
+                members.map((member) => (
+                  <TableRow key={member.user_id}>
+                    <TableCell className="font-medium">
+                      {member.full_name ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {member.email}
+                    </TableCell>
                     <TableCell>
-                      {member.role !== "owner" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                          onClick={() => handleRemove(member.user_id)}
+                      {isAdmin && member.role !== "owner" ? (
+                        <Select
+                          value={member.role}
+                          onValueChange={(v) =>
+                            handleRoleChange(member.user_id, v)
+                          }
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                          <SelectTrigger className="w-28 h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="member">Member</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <RoleBadge role={member.role} />
                       )}
                     </TableCell>
-                  )}
-                </TableRow>
-              ))}
+                    <TableCell className="text-muted-foreground text-sm">
+                      {new Date(member.joined_at).toLocaleDateString()}
+                    </TableCell>
+                    {isAdmin && (
+                      <TableCell>
+                        {member.role !== "owner" && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleRemove(member.user_id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
       {/* Pending invites — admins/owners only */}
-      {isAdmin && invites.length > 0 && (
+      {isAdmin && (
         <Card>
           <CardHeader>
             <CardTitle>Pending invites</CardTitle>
@@ -350,45 +387,49 @@ export default function MembersPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Invited by</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead className="w-20" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invites.map((invite) => (
-                  <TableRow key={invite.id}>
-                    <TableCell className="font-medium">
-                      {invite.email}
-                    </TableCell>
-                    <TableCell>
-                      <RoleBadge role={invite.role} />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {invite.invited_by_email}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {new Date(invite.expires_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleRevokeInvite(invite.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            {invites.length === 0 ? (
+              <EmptyInvites />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Invited by</TableHead>
+                    <TableHead>Expires</TableHead>
+                    <TableHead className="w-20" />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {invites.map((invite) => (
+                    <TableRow key={invite.id}>
+                      <TableCell className="font-medium">
+                        {invite.email}
+                      </TableCell>
+                      <TableCell>
+                        <RoleBadge role={invite.role} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {invite.invited_by_email}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(invite.expires_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleRevokeInvite(invite.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       )}
